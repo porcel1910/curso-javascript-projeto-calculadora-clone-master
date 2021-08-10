@@ -1,6 +1,10 @@
 class CalcController{
 //anderline e pivado ==  this._dataAtual;
     constructor(){
+
+
+        this._lastOperator ='';  
+        this._lastNumber ='';      
         this._operation =[];
         this._locale = 'pt-BR';
         this._displayCalcEl = document.querySelector("#display");
@@ -18,7 +22,10 @@ class CalcController{
 
             this.setDisplayDateTime();
          },1000  );
+         this.setLastNumberToDisplay();
     }
+
+
     addEventListenerAll(element,events,fn){
 
         events.split (' ').forEach(event =>{
@@ -30,11 +37,13 @@ class CalcController{
     clearAll(){
 
         this._operation =[];
+        this.setLastNumberToDisplay();
 
     }
     clearEntry(){
 
         this._operation.pop();
+        this.setLastNumberToDisplay();
 
     }
     getLastOperation(value){
@@ -73,17 +82,66 @@ class CalcController{
         }
 
     }
+
+    getResult(){
+
+        return eval(this._operation.join(""));
+
+
+    }
+
     calc(){
 
-        let last = this._operation.pop();
+        let last = '';
 
-        let result = eval(this._operation.join(""));
-        this._operation =[result,last];
+        if (this._operation.length > 3 ) {
+            last = this._operation.pop();
+            let result = this.getResult();
+
+
+        }
+
+    
+        let result = this.getResult();
+
+        if (last == '%') {
+
+           result /= 100;
+           this._operation =[result];
+
+            
+        } else {
+        
+           
+            this._operation =[result];
+
+           if(last) this._operation.push(last); 
+
+
+        }
+
+
+
+      
+        this.setLastNumberToDisplay();
+        
 
     }
     setLastNumberToDisplay(){
-        
+        let lastNumber;
 
+        for ( let i =this._operation.length-1; i >= 0 ; i--){
+
+            if (!this.isOperation(this._operation[i])) {
+                
+                lastNumber = this._operation[i];
+                break;
+            }
+
+        }
+        if (!lastNumber) lastNumber = 0;  
+
+        this.displayCalc = lastNumber;
 
     }
 
@@ -105,7 +163,7 @@ class CalcController{
 
           }else{
             this.pushOperation(value);
-
+            this.setLastNumberToDisplay();
 
           }
             
@@ -164,7 +222,7 @@ class CalcController{
                 this.addOperation('%');
                 break;
             case 'igual':
-                
+                this.calc();
                 break; 
                 
             case 'ponto':
